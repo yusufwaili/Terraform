@@ -1,13 +1,6 @@
 terraform {
-    required_version = "value"
+    required_version = "1.29.0"
 
-    cloud {
-        organization = "value"
-        workspaces {
-            name = "value"
-        }    
-    }
-    
     required_providers {
         aws = {
             source = "hashicorp/aws"

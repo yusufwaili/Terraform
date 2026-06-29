@@ -25,3 +25,15 @@ variable "azure_subscription_id" {
   type        = string
   description = "Azure subscription ID"
 }
+
+variable "hcp_profile" {
+  description = "HCP Profile Cred"
+  type        = string
+  default     = "default"
+}
+
+variable "workspace_name" {
+  description = "HCP Workspace Name"
+  type        = string
+  default     = "default"
+}
