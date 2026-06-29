@@ -2,4 +2,3 @@ terraform.tfvars
 .terraform/
 terraform.tfstate
 terraform.tfstate.backup
-variables.tf
