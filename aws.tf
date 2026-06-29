@@ -22,20 +22,3 @@ resource "aws_instance" "yusuf-test" {
 output "instance_ips" {
   value = aws_instance.yusuf-test.*.public_ip
 }
-
-data "aws_ami" "hc-base-ubuntu-2404" {
-  for_each = toset(["amd64", "arm64"])
-
-  filter {
-    name   = "name"
-    values = [format("hc-base-ubuntu-2404-%s-*", each.value)]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-
-  most_recent = true
-  owners      = ["888995627335"] # ami-prod account
-}
