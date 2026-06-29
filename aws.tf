@@ -4,12 +4,8 @@ provider "aws" {
 
 }
 
-variable "bucket_prefix" {
-  type = string
-}
-
 resource "aws_s3_bucket" "bucket" {
-  bucket = "${var.bucket_prefix}-bucket"
+  bucket = "hcp-testing-bucket"
 }
 
 output "bucket_name" {
