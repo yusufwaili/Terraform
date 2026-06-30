@@ -2,21 +2,23 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-resource "aws_s3_bucket" "bucket" {
-  bucket = "yusufwaili-hcp-testing-bucket"
-}
-
-output "bucket_name" {
-  value = aws_s3_bucket.bucket.bucket
-}
-
-output "instance_ips" {
-  value = aws_instance.yusuf-test.*.public_ip
+locals {
+  instances = {
+    web  = { instance_type = "t2.micro" }
+    web2 = { instance_type = "t2.micro" }
+    db   = { instance_type = "t2.micro" }
+  }
 }
 
 resource "aws_instance" "yusuf-test" {
+  for_each      = local.instances
   ami           = "ami-0f9f41a981329c67b"
-  instance_type = "t2.micro"
+  instance_type = each.value.instance_type
+  tags          = { Name = each.key }
+}
+
+resource "aws_s3_bucket" "bucket" {
+  bucket = "yusufwaili-hcp-testing-bucket"
 }
 
 check "aws_instances_stopped" {
