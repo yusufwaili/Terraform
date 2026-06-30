@@ -21,11 +21,11 @@ resource "aws_instance" "yusuf-test" {
 
 check "aws_instances_stopped" {
   data "aws_instances" "example" {
-    instance_state_names = "stopped"
+    instance_state_names = ["stopped"]
   }
   assert {
-    condition     = length(data.aws_instances.example) > 0
-    error_message = format("Found Instances have stopped! Instance ID’s: %s", data.aws_instances.example.ids)
+    condition     = length(data.aws_instances.example.ids) == 0
+    error_message = format("Found stopped instances! Instance IDs: %s", join(", ", data.aws_instances.example.ids))
   }
 }
 
