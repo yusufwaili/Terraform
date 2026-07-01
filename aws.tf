@@ -138,8 +138,10 @@ resource "aws_instance" "yusuf-test" {
 
 //S3 Bucket
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_s3_bucket" "lb_logs" {
-  bucket = "yusufwaili-hcp-testing-bucket"
+  bucket = "yusufwaili-hcp-testing-bucket-${data.aws_caller_identity.current.account_id}"
 }
 
 data "aws_elb_service_account" "main" {}
