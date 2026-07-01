@@ -135,10 +135,13 @@ resource "aws_instance" "yusuf-test" {
   vpc_security_group_ids  = [aws_security_group.app_sg.id]
   tags                    = { Name = each.key }
 
-  user_data                   = <<-EOF
+user_data                   = <<-EOF
     #!/bin/bash
+    set -eux
     apt-get update -y
     apt-get install -y ec2-instance-connect
+    systemctl daemon-reload
+    systemctl restart ssh.socket
   EOF
   user_data_replace_on_change = true
 }
