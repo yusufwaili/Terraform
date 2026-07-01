@@ -188,6 +188,17 @@ data "aws_ami" "hc-base-ubuntu-2404" {
   owners      = ["888995627335"] # ami-prod account
 }
 
+//ec2 endpoint
+
+resource "aws_ec2_instance_connect_endpoint" "main" {
+  subnet_id          = aws_subnet.private["us-east-1a"].id
+  security_group_ids = [aws_security_group.eice_sg.id]
+
+  tags = {
+    Name = "test-eice"
+  }
+}
+
 //security group definitions
 
 resource "aws_security_group" "app_sg" {
