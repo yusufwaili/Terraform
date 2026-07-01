@@ -201,6 +201,22 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
+resource "aws_vpc_security_group_egress_rule" "eice_to_app_ssh" {
+  security_group_id            = aws_security_group.eice_sg.id
+  referenced_security_group_id = aws_security_group.app_sg.id
+  from_port = 22
+  to_port   = 22
+  ip_protocol = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "app_from_eice" {
+  security_group_id            = aws_security_group.app_sg.id
+  referenced_security_group_id = aws_security_group.eice_sg.id
+  from_port = 22
+  to_port   = 22
+  ip_protocol = "tcp"
+}
+
 resource "aws_security_group" "lb_sg" {
   name = "test-lb-sg"
   description  = "Controls access to the test Load Balancer"
