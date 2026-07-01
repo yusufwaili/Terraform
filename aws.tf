@@ -134,6 +134,12 @@ resource "aws_instance" "yusuf-test" {
   subnet_id               = aws_subnet.private[each.value.az].id
   vpc_security_group_ids  = [aws_security_group.app_sg.id]
   tags                    = { Name = each.key }
+
+  user_data = <<-EOF
+    #!/bin/bash
+    apt-get update -y
+    apt-get install -y ec2-instance-connect
+  EOF
 }
 
 //S3 Bucket
