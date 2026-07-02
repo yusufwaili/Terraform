@@ -134,16 +134,6 @@ resource "aws_instance" "yusuf-test" {
   subnet_id               = aws_subnet.private[each.value.az].id
   vpc_security_group_ids  = [aws_security_group.app_sg.id]
   tags                    = { Name = each.key }
-
-user_data                   = <<-EOF
-    #!/bin/bash
-    set -eux
-    apt-get update -y
-    apt-get install -y ec2-instance-connect
-    systemctl daemon-reload
-    systemctl restart ssh.socket
-  EOF
-  user_data_replace_on_change = true
 }
 
 //S3 Bucket
@@ -196,17 +186,6 @@ data "aws_ami" "hc-base-ubuntu-2404" {
 
   most_recent = true
   owners      = ["888995627335"] # ami-prod account
-}
-
-//ec2 endpoint
-
-resource "aws_ec2_instance_connect_endpoint" "main" {
-  subnet_id          = aws_subnet.private["us-east-1a"].id
-  security_group_ids = [aws_security_group.eice_sg.id]
-
-  tags = {
-    Name = "test-eice"
-  }
 }
 
 //security group definitions
