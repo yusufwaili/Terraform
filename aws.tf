@@ -127,13 +127,58 @@ locals {
   }
 }
 
+locals {
+  ssm_user_data = <<-EOT
+    #!/bin/bash
+    set -eux
+
+    if systemctl is-active --quiet amazon-ssm-agent \
+      || systemctl is-active --quiet snap.amazon-ssm-agent.amazon-ssm-agent; then
+      exit 0
+    fi
+
+    . /etc/os-release
+
+    if command -v snap >/dev/null 2>&1; then
+      snap wait system seed.loaded
+      snap install amazon-ssm-agent --classic
+      snap start amazon-ssm-agent
+      exit 0
+    fi
+
+    case "$(uname -m)" in
+      x86_64|amd64)  ARCH=amd64 ;;
+      aarch64|arm64) ARCH=arm64 ;;
+    esac
+    BASE=https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest
+
+    case "$ID" in
+      ubuntu|debian)
+        curl -fsSL "$BASE/debian_$ARCH/amazon-ssm-agent.deb" -o /tmp/ssm.deb
+        dpkg -i /tmp/ssm.deb
+        ;;
+      *)
+        dnf install -y "$BASE/linux_$ARCH/amazon-ssm-agent.rpm" \
+          || yum install -y "$BASE/linux_$ARCH/amazon-ssm-agent.rpm"
+        ;;
+    esac
+
+    systemctl enable --now amazon-ssm-agent
+  EOT
+}
+
 resource "aws_instance" "yusuf-test" {
-  for_each                = local.instances
-  ami                     = "ami-0f9f41a981329c67b"
-  instance_type           = each.value.instance_type
-  subnet_id               = aws_subnet.private[each.value.az].id
-  vpc_security_group_ids  = [aws_security_group.app_sg.id]
-  tags                    = { Name = each.key }
+  for_each               = local.instances
+  ami                    = "ami-0f9f41a981329c67b"
+  instance_type          = each.value.instance_type
+  subnet_id              = aws_subnet.private[each.value.az].id
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+
+  iam_instance_profile        = aws_iam_instance_profile.ssm.name   # requirement 1 — attaches in place
+  user_data                   = local.ssm_user_data                 # requirement 2
+  user_data_replace_on_change = true                                # see the note below
+
+  tags = { Name = each.key }
 }
 
 //S3 Bucket
@@ -338,4 +383,26 @@ resource "aws_lb_target_group_attachment" "app" {
   target_group_arn = aws_lb_target_group.app.arn
   target_id        = each.value.id
   port              = 8080
+}
+
+resource "aws_iam_role" "ssm" {
+  name = "test-ssm-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm" {
+  name = "test-ssm-profile"
+  role = aws_iam_role.ssm.name
 }
