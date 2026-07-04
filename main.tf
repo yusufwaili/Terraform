@@ -31,7 +31,7 @@ resource "aws_instance" "yusuf-test" {
   for_each               = local.instances
   ami                    = "ami-0f9f41a981329c67b"
   instance_type          = each.value.instance_type
-  subnet_id              = aws_subnet.private[each.value.az].id
+  subnet_id              = local.private_subnet_by_az[each.value.az] # was aws_subnet.private[each.value.az].id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
 
   iam_instance_profile        = aws_iam_instance_profile.ssm.name
@@ -101,7 +101,7 @@ resource "aws_lb" "test" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = [for subnet in aws_subnet.public : subnet.id]
+  subnets            = module.vpc.public_subnets # was [for subnet in aws_subnet.public : subnet.id]
 
   enable_deletion_protection = true
 
@@ -122,7 +122,7 @@ resource "aws_lb_target_group" "app" {
   name     = "test-app-tg"
   port     = 8080
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
+  vpc_id   = module.vpc.vpc_id 
 
   health_check {
     path                = "/health"

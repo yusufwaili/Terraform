@@ -21,5 +21,5 @@ output "target_group_arn" {
 }
 
 output "vpc_id" {
-  value = aws_vpc.main.id
+  value = module.vpc.vpc_id
 }

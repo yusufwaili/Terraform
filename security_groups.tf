@@ -6,7 +6,7 @@
 resource "aws_security_group" "app_sg" {
   name        = "test-app-sg"
   description = "Controls access to the app EC2 instances"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = module.vpc.vpc_id
 
   tags = {
     Name        = "test-app-sg"
@@ -35,7 +35,7 @@ resource "aws_vpc_security_group_egress_rule" "app_all_outbound" {
 resource "aws_security_group" "lb_sg" {
   name        = "test-lb-sg"
   description = "Controls access to the test Load Balancer"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = module.vpc.vpc_id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "lb_http" {
