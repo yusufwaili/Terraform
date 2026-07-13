@@ -96,7 +96,7 @@ resource "aws_s3_bucket_policy" "lb_logs" {
 
 # --- Load balancer -----------------------------------------------------------
 
-resource "aws_lb" "test3" {
+resource "aws_lb" "test" {
   name               = "test-lb-tf"
   internal           = false
   load_balancer_type = "application"
